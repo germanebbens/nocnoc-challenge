@@ -5,6 +5,8 @@ Data engineering solution for employee database analysis and processing using SQ
 Repo contains:
 - [Challenge](/Challenge%20Data%20Engineer%20-%20NocNoc%20__.pdf): steps to complete challenge.
 - Dockerfile & docker-compose.yml: docker config files to run database and load data.
+- /01-sql folder: answers to part 1 of the exercise
+
 
 ## Database Setup
 
