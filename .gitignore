@@ -108,4 +108,5 @@ cython_debug/
 # Parquet files, and spark stack
 *.parquet*
 *.crs
+*.crc
 *_SUCCESS*

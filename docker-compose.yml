@@ -35,7 +35,7 @@ services:
       - ./02-data_processing:/app
       - ./02-data_processing/output:/app/output
       - ./02-data_processing/lib:/app/lib
-      - ./requirements.txt:/app/requirements.txt
+      - ./requirements.txt:/requirements.txt
     networks:
       - app_network
     depends_on:
@@ -43,8 +43,8 @@ services:
         condition: service_healthy
     command: >
       bash -c "
+        pip install -r /requirements.txt &&
         cd /app &&
-        pip install -r requirements.txt &&
         python main.py
       "
 

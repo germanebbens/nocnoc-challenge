@@ -105,3 +105,10 @@ I focus on current employees (where to_date = `9999-01-01`) to analyze the prese
 
 ## Data Processing (with Python and Spark)
 
+The `/02-data_processing` folder contains a simple ETL pipeline for processing employee data using PySpark. The project follows a straightforward approach to extract data from a MySQL database, perform basic validations, and prepare the dataset for further analysis.
+
+
+The main script connects to the database, loads the tables, and applies basic data validation checks based on predefined schemas. It checks for data type consistency and identifies potential issues like null values or duplicate records. After cleaning the data, the pipeline saves the processed datasets in Parquet format and generates a couple of basic reports about annual salaries and employee department changes.
+
+
+This data processing solution uses Spark to handle the extract and transform stages, providing a simple method to clean and prepare the employee database for potential further analysis or reporting needs.
