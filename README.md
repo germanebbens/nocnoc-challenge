@@ -4,8 +4,9 @@ Data engineering solution for employee database analysis and processing using SQ
 
 Repo contains:
 - [Challenge](/Challenge%20Data%20Engineer%20-%20NocNoc%20__.pdf): steps to complete challenge.
-- Dockerfile & docker-compose.yml: docker config files to run database and load data.
+- Dockerfile & docker-compose.yml: docker config files to run database, load and process data.
 - /01-sql folder: answers to part 1 of the exercise
+- /02-data_processing: 
 
 
 ## Database Setup
@@ -101,3 +102,6 @@ The query carefully handles overlapping time periods to ensure I'm only counting
 This query calculates the gender proportion for each department and identifies which departments have the highest gender disparity.
 
 I focus on current employees (where to_date = `9999-01-01`) to analyze the present situation rather than historical patterns. The query uses a CTE with window functions to efficiently calculate both individual gender counts and total department employee counts in one pass.
+
+## Data Processing (with Python and Spark)
+

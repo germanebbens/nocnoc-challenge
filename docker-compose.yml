@@ -1,14 +1,53 @@
 services:
   db:
-    build: .
     container_name: employees_db
-    ports:
-      - "3306:3306"
+    build:
+      context: ../
+      dockerfile: Dockerfile
     environment:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: employees
+    ports:
+      - "3306:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
       interval: 5s
       timeout: 5s
       retries: 10
+    networks:
+      - app_network
+
+  spark:
+    image: bitnami/spark:3.3.0
+    container_name: spark_processing
+    environment:
+      - SPARK_MODE=master
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+      - SPARK_DRIVER_MEMORY=4g
+      - SPARK_EXECUTOR_MEMORY=4g
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+    volumes:
+      - ./02-data_processing:/app
+      - ./02-data_processing/output:/app/output
+      - ./02-data_processing/lib:/app/lib
+      - ./requirements.txt:/app/requirements.txt
+    networks:
+      - app_network
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      bash -c "
+        cd /app &&
+        pip install -r requirements.txt &&
+        python main.py
+      "
+
+networks:
+  app_network:
+    driver: bridge
