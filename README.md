@@ -113,6 +113,8 @@ Build and start data processing and reporting container:
 docker-compose up -d spark
 ```
 
+This will process the main.py, with the ETL process, and then leave an endpoint open to receive airflow requests for report creation.
+
 ### Report Generation
 
 The report generation module creates four analytical reports from the processed employee data.
@@ -144,3 +146,74 @@ This detailed timeline tracks organizational changes between specified dates (de
 - Title changes
 - Salary changes
 - Manager changes
+
+
+## Airflow Automation - Pipeline Architecture
+
+The system uses a microservices architecture to separate orchestration (Airflow) from data processing (Spark). Communication between them is achieved through a REST API developed with Flask.
+
+### Components:
+
+1. **Spark Container**: Responsible for data processing and analysis using PySpark. Exposes a very easy REST API to generate reports on demand.
+
+2. **Airflow Container**: Responsible for task orchestration and scheduling, execution monitoring, and error handling.
+
+3. **Flask API**: Interface that allows Airflow to request report generation from the Spark container.
+
+### REST API for Processing
+
+A REST endpoint was implemented in the Spark container that allows requesting the generation of change reports for a specific period:
+
+`http://localhost:5000/process?start_date=2000-02-01&end_date=2000-03-01`
+
+This endpoint receives start and end dates as parameters and executes processing in the background, immediately returning a response to allow Airflow to continue its flow.
+
+### Airflow DAG
+
+The implemented DAG (`employee_changes_monthly_report`) automates the complete process of generating and storing monthly reports:
+
+1. **calculate_date_range**: Calculates the date range for the previous month or uses user-defined parameters.
+
+2. **clean_previous_reports**: Prepares the environment by removing previous reports.
+
+3. **call_api**: Invokes the API endpoint to initiate data processing.
+
+4. **wait_for_csv**: Waits until the CSV report is generated.
+
+5. **upload_to_s3**: Simulates uploading the generated CSV file to an S3 bucket.
+
+6. **notify_success**: Notifies successful completion of the process.
+
+The DAG is scheduled to run automatically on the first day of each month at 3:00 AM, generating the previous month's change report.
+
+### Error Handling
+
+An alert system was implemented that sends email notifications in case of failures at any stage of the process. This allows for quick manual intervention if necessary.
+
+### S3 Connection
+
+In a production environment, uploading to S3 should be done using official Airflow connectors:
+
+1. **AWS Provider Installation**:
+
+    `pip install apache-airflow-providers-amazon`
+
+
+2. **Connection Configuration**: Configure an AWS connection in the Airflow interface with appropriate credentials.
+
+3. **S3 Operator Usage**: Replace the simulation task with a real S3 operator:
+
+    ```python
+    from airflow.providers.amazon.aws.transfers.local_to_s3 import LocalFilesystemToS3Operator
+
+    upload_to_s3 = LocalFilesystemToS3Operator(
+        task_id='upload_to_s3',
+        filename=f'{CSV_DIR}/*.csv',
+        dest_key=f'reports/employee_changes_{{ execution_date.strftime("%Y-%m") }}.csv',
+        dest_bucket='my-s3-bucket',
+        aws_conn_id='aws_default',
+        replace=True
+    )
+    ```
+
+
