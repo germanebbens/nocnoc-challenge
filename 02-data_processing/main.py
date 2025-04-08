@@ -41,9 +41,9 @@ def main():
     
     print("\n=== Saving Cleaned Data ===")
     for table, df in cleaned_dataframes.items():
-        output_path = f"{Config.OUTPUT_DIR}/{table}.parquet"
+        output_path = f"{tables_dir}/{table}.parquet"
         print(f"Saving cleaned {table} to {output_path}")
-        # df.write.mode("overwrite").parquet(output_path)
+        df.write.mode("overwrite").parquet(output_path)
 
     print("\n=== Generating Reports ===")
     report_generator = ReportGenerator(spark_manager.spark, reports_dir)
