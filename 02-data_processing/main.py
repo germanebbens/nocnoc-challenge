@@ -43,7 +43,7 @@ def main():
     for table, df in cleaned_dataframes.items():
         output_path = f"{Config.OUTPUT_DIR}/{table}.parquet"
         print(f"Saving cleaned {table} to {output_path}")
-        df.write.mode("overwrite").parquet(output_path)
+        # df.write.mode("overwrite").parquet(output_path)
 
     print("\n=== Generating Reports ===")
     report_generator = ReportGenerator(spark_manager.spark, reports_dir)
@@ -57,6 +57,24 @@ def main():
     report_generator.identify_job_hoppers(
         cleaned_dataframes['dept_emp'], 
         cleaned_dataframes['employees']
+    )
+
+    print("\n=== Generating Additional Reports ===")
+    report_generator.generate_employee_master_report(
+        cleaned_dataframes['employees'],
+        cleaned_dataframes['dept_emp'], 
+        cleaned_dataframes['titles'],
+        cleaned_dataframes['salaries'],
+        cleaned_dataframes['departments']
+    )
+
+    report_generator.generate_changes_report(
+        cleaned_dataframes['employees'],
+        cleaned_dataframes['dept_emp'],
+        cleaned_dataframes['titles'],
+        cleaned_dataframes['salaries'],
+        cleaned_dataframes['dept_manager'],
+        cleaned_dataframes['departments']
     )
     
     spark_manager.stop_session()
