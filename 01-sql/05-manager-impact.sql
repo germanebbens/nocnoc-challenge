@@ -5,16 +5,16 @@ WITH emp_tenure AS (
         d.dept_name,
         de.emp_no,
         CASE
-            WHEN de.to_date = '9999-01-01' THEN DATEDIFF(CURRENT_DATE(), GREATEST(de.from_date, dm.from_date))
+            WHEN de.to_date = '9999-01-01' THEN DATEDIFF('2002-12-31', GREATEST(de.from_date, dm.from_date))
             WHEN de.to_date < dm.to_date THEN DATEDIFF(de.to_date, GREATEST(de.from_date, dm.from_date))
-            ELSE DATEDIFF(CASE WHEN dm.to_date = '9999-01-01' THEN CURRENT_DATE() ELSE dm.to_date END, 
+            ELSE DATEDIFF(CASE WHEN dm.to_date = '9999-01-01' THEN '2002-12-31' ELSE dm.to_date END, 
                           GREATEST(de.from_date, dm.from_date))
         END / 365.0 AS years_under_manager
     FROM dept_manager dm
     JOIN employees e ON dm.emp_no = e.emp_no
     JOIN departments d ON dm.dept_no = d.dept_no
     JOIN dept_emp de ON dm.dept_no = de.dept_no
-    WHERE de.from_date <= CASE WHEN dm.to_date = '9999-01-01' THEN CURRENT_DATE() ELSE dm.to_date END
+    WHERE de.from_date <= CASE WHEN dm.to_date = '9999-01-01' THEN '2002-12-31' ELSE dm.to_date END
       AND (de.to_date >= dm.from_date OR de.to_date = '9999-01-01')
 ),
 retention_stats AS (

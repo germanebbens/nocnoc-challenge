@@ -1,7 +1,7 @@
 SELECT e.emp_no,
        CONCAT(e.first_name, ' ', e.last_name) AS full_name,
        e.hire_date,
-       DATEDIFF(CURRENT_DATE(), e.hire_date) / 365 AS years_of_service,
+       DATEDIFF('2002-12-31', e.hire_date) / 365 AS years_of_service,
        d.dept_name AS current_department,
        t.title AS current_title
 FROM employees e
