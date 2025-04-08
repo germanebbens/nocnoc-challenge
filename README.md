@@ -16,6 +16,8 @@ Repo contains:
 
 ## Database Setup
 
+![Employees class diagram](/images/employees.png)
+
 The project uses the [MySQL Employees Sample Database](https://github.com/datacharmer/test_db), a combination of a large base of data (approximately 160MB) spread over six separate tables and consisting of 4 million records in total.
 
 [MySQL Sample Database official documentation](https://dev.mysql.com/doc/employee/en/employees-introduction.html)
@@ -170,6 +172,8 @@ This endpoint receives start and end dates as parameters and executes processing
 
 ### Airflow DAG
 
+![Airflow running](/images/airflow_running.png)
+
 The implemented DAG (`employee_changes_monthly_report`) automates the complete process of generating and storing monthly reports:
 
 1. **calculate_date_range**: Calculates the date range for the previous month or uses user-defined parameters.
@@ -216,4 +220,39 @@ In a production environment, uploading to S3 should be done using official Airfl
     )
     ```
 
+## High level architecture diagram
 
+![Arch Diagram](/images/arch_diagram.png)
+
+
+## Proposed Improvements
+
+To enhance the code quality, maintainability, and robustness of this repository, I would make the following improvements:
+
+### Code Quality
+- **Implement linters**: Set up Black for formatting, Pylint for code analysis, and Flake8 for PEP 8 compliance
+- **Add type hints**: Incorporate Python type annotations to improve code clarity and enable static analysis
+- **Add docstrings**: Ensure comprehensive documentation within the code following a standard format (e.g., Google style)
+- **Implement unit tests**: Develop a comprehensive test suite with pytest, including mock tests for external dependencies
+
+### Logging
+- **Structured logging**: Implement a proper logging framework with different levels (DEBUG, INFO, ERROR)
+- **Centralized logs**: Set up a centralized logging system to aggregate logs from all containers
+
+### Configuration Management
+- **Environment variables**: Replace hardcoded values with environment variables using dotenv
+- **Configuration files**: Implement a hierarchical configuration system for different environments (dev, test, prod)
+
+### Error Handling
+- **Custom exceptions**: Define application-specific exception hierarchy
+- **Graceful degradation**: Implement fallback mechanisms for non-critical failures
+
+### Infrastructure Improvements
+- **CI/CD pipeline**: Set up automated testing, linting, and deployment pipeline
+- **Monitoring**: Implement application metrics and monitoring with tools like Grafana.
+- **Containerization**: Optimize Docker images for smaller size and better security
+
+### Data Processing Enhancements
+- **Incremental processing**: Implement change data capture for more efficient data processing
+- **Quality checks**: Add more data validations and quality metrics
+- **Lineage**: Track data transformations for better auditability
