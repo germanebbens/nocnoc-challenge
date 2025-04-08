@@ -110,3 +110,7 @@ cython_debug/
 *.crs
 *.crc
 *_SUCCESS*
+
+# General 
+*.log
+latest

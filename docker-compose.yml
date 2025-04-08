@@ -31,6 +31,7 @@ services:
     ports:
       - "8080:8080"
       - "7077:7077"
+      - "5000:5000"
     volumes:
       - ./02-data_processing:/app
       - ./02-data_processing/output:/app/output
@@ -45,8 +46,36 @@ services:
       bash -c "
         pip install -r /requirements.txt &&
         cd /app &&
-        python main.py
+        python main.py; python api.py
       "
+
+  airflow:
+    image: apache/airflow:2.6.3
+    container_name: airflow
+    environment:
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - _AIRFLOW_DB_UPGRADE=true
+      - _AIRFLOW_WWW_USER_CREATE=true
+      - _AIRFLOW_WWW_USER_USERNAME=admin
+      - _AIRFLOW_WWW_USER_PASSWORD=admin
+      - AIRFLOW__SMTP__SMTP_HOST=smtp.gmail.com
+      - AIRFLOW__SMTP__SMTP_USER=airflow@example.com
+      - AIRFLOW__SMTP__SMTP_PASSWORD=your_password
+      - AIRFLOW__SMTP__SMTP_PORT=587
+      - AIRFLOW__SMTP__SMTP_MAIL_FROM=airflow@example.com
+    volumes:
+      - ./03-airflow/dags:/opt/airflow/dags
+      - ./03-airflow/logs:/opt/airflow/logs
+      - ./03-airflow/plugins:/opt/airflow/plugins
+      - ./03-airflow/data:/opt/airflow/data
+      - ./02-data_processing/output:/output
+    ports:
+      - "8085:8080"
+    networks:
+      - app_network
+    depends_on:
+      - db
+    command: standalone
 
 networks:
   app_network:
