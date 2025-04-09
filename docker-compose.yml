@@ -1,0 +1,82 @@
+services:
+  db:
+    container_name: employees_db
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: employees
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - app_network
+
+  spark:
+    image: bitnami/spark:3.3.0
+    container_name: spark_processing
+    environment:
+      - SPARK_MODE=master
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+      - SPARK_DRIVER_MEMORY=4g
+      - SPARK_EXECUTOR_MEMORY=4g
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+      - "5000:5000"
+    volumes:
+      - ./02-data_processing:/app
+      - ./02-data_processing/output:/app/output
+      - ./02-data_processing/lib:/app/lib
+      - ./requirements.txt:/requirements.txt
+    networks:
+      - app_network
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      bash -c "
+        pip install -r /requirements.txt &&
+        cd /app &&
+        python main.py; python api.py
+      "
+
+  airflow:
+    image: apache/airflow:2.6.3
+    container_name: airflow
+    environment:
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - _AIRFLOW_DB_UPGRADE=true
+      - _AIRFLOW_WWW_USER_CREATE=true
+      - _AIRFLOW_WWW_USER_USERNAME=admin
+      - _AIRFLOW_WWW_USER_PASSWORD=admin
+      - AIRFLOW__SMTP__SMTP_HOST=smtp.gmail.com
+      - AIRFLOW__SMTP__SMTP_USER=airflow@example.com
+      - AIRFLOW__SMTP__SMTP_PASSWORD=your_password
+      - AIRFLOW__SMTP__SMTP_PORT=587
+      - AIRFLOW__SMTP__SMTP_MAIL_FROM=airflow@example.com
+    volumes:
+      - ./03-airflow/dags:/opt/airflow/dags
+      - ./03-airflow/logs:/opt/airflow/logs
+      - ./03-airflow/plugins:/opt/airflow/plugins
+      - ./03-airflow/data:/opt/airflow/data
+      - ./02-data_processing/output:/output
+    ports:
+      - "8085:8080"
+    networks:
+      - app_network
+    depends_on:
+      - db
+    command: standalone
+
+networks:
+  app_network:
+    driver: bridge
