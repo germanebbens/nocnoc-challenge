@@ -1,6 +1,17 @@
 from pyspark.sql.functions import col, when, count, isnull
 
 class DataValidator:
+    """
+    Validates and cleans dataframes from employee database tables
+    
+    Provides methods to check for null values, duplicate primary keys, data 
+    type consistency, and date range validity. Also handles data cleaning 
+    operations, including type casting and duplicate removal.
+    
+    Note: This class does not require initialization since it doesnt 
+    maintain any internal state and operates only with the provided parameters
+    """
+
     def validate(self, dataframes, pk_columns, date_tables, schemas):
         validation_results = {}
         

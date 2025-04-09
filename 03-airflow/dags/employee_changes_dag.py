@@ -57,14 +57,17 @@ def call_process_api(**context):
     else:
         raise Exception(f"API returned unexpected status code: {response.status_code}, Response: {response.text}")
 
-def upload_to_s3(**context):    
+def upload_to_s3(**context):
+    """
+    Simulates uploading the generated CSV report to an S3 bucket
+    """  
     return f"File uploaded to S3 (simulated): {context['params']['s3_bucket_dir']}"
 
 with DAG(
     'employee_changes_monthly_report',
     default_args=default_args,
     description='Generates a monthly report of changes in the employee base',
-    schedule_interval='0 3 1 * *',
+    schedule_interval='0 3 1 * *', # running 3 AM on first day of each month
     start_date=days_ago(1),
     catchup=False,
     on_failure_callback=task_failure_callback,
@@ -75,23 +78,27 @@ with DAG(
     },
 ) as dag:
     
+    # step 1: calculate the date range for the report
     calculate_dates = PythonOperator(
         task_id='calculate_date_range',
         python_callable=calculate_date_range,
         provide_context=True,
     )
     
+    # step 2: clean any previous report files
     clean_previous_reports = BashOperator(
         task_id='clean_previous_reports',
         bash_command=f'chmod -R 777 {CSV_DIR} && rm -f {CSV_DIR}/*.csv || true',
     )
     
+    # sep 3: call the Spark process with an API, to generate the report
     call_api = PythonOperator(
         task_id='call_api',
         python_callable=call_process_api,
         provide_context=True,
     )
     
+    # step 4: wait the CSV file
     wait_for_csv = FileSensor(
         task_id='wait_for_csv',
         filepath=f'{CSV_DIR}/*.csv',
@@ -100,6 +107,7 @@ with DAG(
         mode='poke',
     )
     
+    # step 5: load report to S3
     upload_to_s3_task = PythonOperator(
         task_id='upload_to_s3',
         python_callable=upload_to_s3,

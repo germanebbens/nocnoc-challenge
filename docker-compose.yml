@@ -2,7 +2,7 @@ services:
   db:
     container_name: employees_db
     build:
-      context: ../
+      context: .
       dockerfile: Dockerfile
     environment:
       MYSQL_ROOT_PASSWORD: password

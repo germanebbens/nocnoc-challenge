@@ -1,6 +1,15 @@
 from pyspark.sql.types import IntegerType, StringType, DateType
 
 class Config:
+    """
+    Configuration static class defining database schema and processing parameters:
+    - PK_COLUMNS: Primary key definitions for each table
+    - DATE_TABLES: Tables containing date range fields
+    - TABLE_SCHEMAS: Column data types for all database tables
+    - TABLES: List of all tables to process
+    - OUTPUT_DIR: Directory for storing processed data and reports
+    """
+
     PK_COLUMNS = {
         "employees": ["emp_no"],
         "departments": ["dept_no"],

@@ -5,6 +5,15 @@ from config import Config
 import os
 
 def main():
+    """
+    Executes the complete employee data processing pipeline:
+        1. Sets up output directories
+        2. Establishes MySQL connection and loads data
+        3. Validates and cleans data
+        4. Saves cleaned data in Parquet format
+        5. Generates analysis and reports
+        6. Terminates the Spark session
+    """
     # create output directory if not exist
     tables_dir = os.path.join(Config.OUTPUT_DIR, "tables")
     os.makedirs(tables_dir, exist_ok=True)
